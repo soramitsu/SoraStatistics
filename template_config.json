@@ -1,0 +1,14 @@
+{
+  "networks": [
+    {
+      "name": "ethereum",
+      "address": "eth address",
+      "from-block": 0 // optional
+    },
+    {
+      "name": "sora",
+      "address": "sora address",
+      "from-block": 0 // optional
+    }
+  ]
+}
