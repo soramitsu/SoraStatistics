@@ -18,8 +18,18 @@ function_mappings = {
 def compile_final_report(base_path, add_networks):
     networks = os.path.join(base_path, "networks")
 
+    dirs = os.listdir(networks)
+
+    if len(dirs) == 1:
+        root = os.path.split(base_path)[0]
+        name = os.path.join(root, dirs[0])
+        os.rename(os.path.join(networks, dirs[0]), name)
+        shutil.rmtree(base_path)
+        print(f"Statistics saved in {name}")
+        return
+
     data_frame = pd.DataFrame()
-    for filename in os.listdir(networks):
+    for filename in dirs:
         new_transactions = pd.read_csv(os.path.join(networks, filename), index_col=0)
         data_frame = data_frame.append(new_transactions, ignore_index=True)
 
@@ -36,8 +46,12 @@ def compile_final_report(base_path, add_networks):
 
     if not add_networks:
         root = os.path.split(base_path)[0]
-        os.rename(file_path, os.path.join(root, name))
+        path = os.path.join(root, name)
+        os.rename(file_path, path)
         shutil.rmtree(base_path)
+        print(f"Statistics saved in {path}")
+    else:
+        print(f"Statistics saved in {base_path}")
 
 
 def main():
