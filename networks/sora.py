@@ -149,6 +149,36 @@ def process_register(context: Context, node, transaction):
     return [transaction]
 
 
+def process_reward(context: Context, node, transaction):
+    transaction["send_or_receive"] = "R"
+    transaction["receiver"] = context.address
+
+    transactions = []
+
+    fee = transaction["network_fee"]
+    ticker = transaction["fee_ticker"]
+
+    transaction["network_fee"] = ""
+    transaction["fee_ticker"] = ""
+
+    i = 1
+    for elem in node["data"]:
+        new_transaction = transaction.copy()
+
+        new_transaction["line"] = i
+        new_transaction["amount"] = set_precision(elem["amount"],
+                                                  context.store.get_asset_precision(elem["assetId"]))
+        new_transaction["ticker"] = context.store.get_asset_ticker(elem["assetId"])
+        transactions.append(new_transaction)
+        i += 1
+
+    if len(transaction) > 0:
+        transactions[0]["network_fee"] = fee
+        transactions[0]["fee_ticker"] = ticker
+
+    return transactions
+
+
 def process_module(context: Context, node, transaction):
     transaction["type"] = node["method"]
 
@@ -165,26 +195,8 @@ def process_module(context: Context, node, transaction):
     elif node["module"] == "poolXYK" and (
             node["method"] == "withdrawLiquidity" or node["method"] == "depositLiquidity"):
         return process_pool(context, node, transaction)
-    elif node["module"] == "pswapDistribution" and node["method"] == "claimIncentive":
-
-        transaction["send_or_receive"] = "R"
-        transaction["receiver"] = context.address
-
-        transactions = []
-
-        for elem in node["data"]:
-            new_transaction = transaction.copy()
-            new_transaction["amount"] = set_precision(elem["amount"],
-                                                      context.store.get_asset_precision(elem["assetId"]))
-            new_transaction["ticker"] = context.store.get_asset_ticker(elem["assetId"])
-            transactions.append(new_transaction)
-
-        return transactions
-
     elif node["module"] == "ethBridge" and node["method"] == "transferToSidechain":
-
         return process_to_bridge(context, node, transaction)
-
     elif node["module"] == "utility" and node["method"] == "batchAll":
 
         for elem in node["data"]:
@@ -195,12 +207,16 @@ def process_module(context: Context, node, transaction):
                 elem["data"]["targetAssetId"] = elem["data"]["args"]["input_asset_b"]
                 return process_module(context, elem, transaction)
 
-        with open('newfile.txt', 'a', encoding='utf-8') as g:
-            print("[NEW] ", node, file=g)
     elif node["module"] == "referrals" and (node["method"] == "reserve" or node["method"] == "unreserve"):
         return process_refferals(context, node, transaction)
-    else:
-        return [transaction]
+    elif (node["module"] == "rewards" and node["method"] == "claim") or (
+            node["module"] == "pswapDistribution" and node["method"] == "claimIncentive") or (
+            node["module"] == "vestedRewards" and node["method"] == "claimRewards") or (
+            node["module"] == "vestedRewards" and node["method"] == "claimCrowdloanRewards"):
+
+        return process_reward(context, node, transaction)
+
+    return [transaction]
 
 
 def sora_process(base_path, address, from_block):
@@ -234,31 +250,32 @@ def sora_process(base_path, address, from_block):
                     {"module": {"equalTo": "referrals"}, "method": {"equalTo": "reserve"}},
                     {"module": {"equalTo": "referrals"}, "method": {"equalTo": "unreserve"}},
 
-                    # {
-                    #     "or": [{"module": {"equalTo": "pswapDistribution"},
-                    #             "method": {"equalTo": "claimIncentive"}},
-                    #            {"module": {"equalTo": "rewards"},
-                    #             "method": {"equalTo": "claim"}},
-                    #            {"module": {"equalTo": "vestedRewards"},
-                    #             "method": {"equalTo": "claimRewards"}},
-                    #            {"module": {"equalTo": "vestedRewards"},
-                    #             "method": {"equalTo": "claimCrowdloanRewards"}},
-                    #            {"module": {"equalTo": "utility"},
-                    #             "method": {"equalTo": "batchAll"}, "or": [{"data": {
-                    #                "contains": [{"module": "pswapDistribution",
-                    #                              "method": "claimIncentive"}]}}, {"data": {
-                    #                "contains": [{"module": "rewards", "method": "claim"}]}}, {
-                    #                "data": {
-                    #                    "contains": [
-                    #                        {
-                    #                            "module": "vestedRewards",
-                    #                            "method": "claimRewards"}]}},
-                    #                {"data": {
-                    #                    "contains": [{
-                    #                        "module": "vestedRewards",
-                    #                        "method": "claimCrowdloanRewards"}]}}
-                    #            ]}
-                    #            ]}
+                    {
+                        "or": [
+                            {"module": {"equalTo": "pswapDistribution"},
+                             "method": {"equalTo": "claimIncentive"}},
+                            {"module": {"equalTo": "rewards"},
+                             "method": {"equalTo": "claim"}},
+                            {"module": {"equalTo": "vestedRewards"},
+                             "method": {"equalTo": "claimRewards"}},
+                            {"module": {"equalTo": "vestedRewards"},
+                             "method": {"equalTo": "claimCrowdloanRewards"}},
+                            {"module": {"equalTo": "utility"},
+                             "method": {"equalTo": "batchAll"}, "or": [{"data": {
+                                "contains": [{"module": "pswapDistribution",
+                                              "method": "claimIncentive"}]}}, {"data": {
+                                "contains": [{"module": "rewards", "method": "claim"}]}}, {
+                                "data": {
+                                    "contains": [
+                                        {
+                                            "module": "vestedRewards",
+                                            "method": "claimRewards"}]}},
+                                {"data": {
+                                    "contains": [{
+                                        "module": "vestedRewards",
+                                        "method": "claimCrowdloanRewards"}]}}
+                            ]}
+                        ]}
                 ]},
                 {
                     "or": [

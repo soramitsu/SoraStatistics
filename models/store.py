@@ -87,7 +87,7 @@ class TokenStore:
             if not self._fetch_token(asset_id):
                 return 0
 
-        return self.store[asset_id].precision
+        return int(self.store[asset_id].precision)
 
     def _reliable_send(self, req: str):
         i = len(self.hosts)
