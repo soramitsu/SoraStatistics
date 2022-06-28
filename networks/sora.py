@@ -78,6 +78,17 @@ def process_transfer(context: Context, node, transaction):
     return [transaction]
 
 
+def process_refferals(context: Context, node, transaction):
+    transaction["amount"] = node["data"]["amount"]
+    transaction["ticker"] = "XOR"
+    transaction["send_or_receive"] = "S" if node["data"]["from"] == context.address else "R"
+    if transaction["send_or_receive"] == "S":
+        transaction["sender"] = node["data"]["from"]
+    elif transaction["send_or_receive"] == "R":
+        transaction["receiver"] = node["data"]["to"]
+    return [transaction]
+
+
 def process_swap(context: Context, node, transaction):
     from_transaction = transaction.copy()
     from_transaction["lp_fee"] = node["data"]["liquidityProviderFee"]
@@ -186,11 +197,10 @@ def process_module(context: Context, node, transaction):
 
         with open('newfile.txt', 'a', encoding='utf-8') as g:
             print("[NEW] ", node, file=g)
+    elif node["module"] == "referrals" and (node["method"] == "reserve" or node["method"] == "unreserve"):
+        return process_refferals(context, node, transaction)
     else:
-        with open('newfile.txt', 'a', encoding='utf-8') as g:
-            print("[NEW] ", node, file=g)
-
-    return []
+        return [transaction]
 
 
 def sora_process(base_path, address, from_block):
@@ -220,9 +230,9 @@ def sora_process(base_path, address, from_block):
 
                     {"module": {"equalTo": "assets"}, "method": {"equalTo": "register"}},
 
-                    # {"module": {"equalTo": "referrals"}, "method": {"equalTo": "setReferrer"}},
-                    # {"module": {"equalTo": "referrals"}, "method": {"equalTo": "reserve"}},
-                    # {"module": {"equalTo": "referrals"}, "method": {"equalTo": "unreserve"}},
+                    {"module": {"equalTo": "referrals"}, "method": {"equalTo": "setReferrer"}},
+                    {"module": {"equalTo": "referrals"}, "method": {"equalTo": "reserve"}},
+                    {"module": {"equalTo": "referrals"}, "method": {"equalTo": "unreserve"}},
 
                     # {
                     #     "or": [{"module": {"equalTo": "pswapDistribution"},
