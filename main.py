@@ -23,7 +23,7 @@ def compile_final_report(base_path, add_networks):
         new_transactions = pd.read_csv(os.path.join(networks, filename), index_col=0)
         data_frame = data_frame.append(new_transactions, ignore_index=True)
 
-    data_frame = data_frame.sort_values(by="Time Stamp", ascending=False)
+    data_frame = data_frame.sort_values(by="Time Stamp", ascending=False, ignore_index=True)
 
     if data_frame.empty:
         print("No transactions")
@@ -45,10 +45,12 @@ def main():
 
     parser.add_argument('--add-networks', dest="add_networks", action='store_true',
                         help='add networks\' reports to result')
+    parser.add_argument('config_path',
+                        help='config file with networks data')
 
     args = parser.parse_args()
 
-    f = open('config.json')
+    f = open(args.config_path)
 
     data = json.load(f)
 
