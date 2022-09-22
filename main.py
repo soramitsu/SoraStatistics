@@ -1,11 +1,8 @@
 import json
 import multiprocessing as mp
 import os
-import shutil
-from datetime import datetime
 import argparse
 
-import pandas as pd
 from networks.ethereum import eth_process
 from networks.sora import sora_process
 
@@ -15,50 +12,9 @@ function_mappings = {
 }
 
 
-def compile_final_report(base_path, add_networks):
-    networks = os.path.join(base_path, "networks")
-
-    dirs = os.listdir(networks)
-
-    if len(dirs) == 1:
-        root = os.path.split(base_path)[0]
-        name = os.path.join(root, dirs[0])
-        os.rename(os.path.join(networks, dirs[0]), name)
-        shutil.rmtree(base_path)
-        print(f"Statistics saved in {name}")
-        return
-
-    data_frame = pd.DataFrame()
-    for filename in dirs:
-        new_transactions = pd.read_csv(os.path.join(networks, filename), index_col=0)
-        data_frame = data_frame.append(new_transactions, ignore_index=True)
-
-    data_frame = data_frame.sort_values(by="Time Stamp", ascending=False, ignore_index=True)
-
-    if data_frame.empty:
-        print("No transactions")
-        return
-
-    stime = datetime.now().strftime("%H:%M %d.%m.%y")
-    name = f"Report {stime}.csv"
-    file_path = os.path.join(base_path, name)
-    data_frame.to_csv(file_path)
-
-    if not add_networks:
-        root = os.path.split(base_path)[0]
-        path = os.path.join(root, name)
-        os.rename(file_path, path)
-        shutil.rmtree(base_path)
-        print(f"Statistics saved in {path}")
-    else:
-        print(f"Statistics saved in {base_path}")
-
-
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--add-networks', dest="add_networks", action='store_true',
-                        help='add networks\' reports to result')
     parser.add_argument('config_path',
                         help='config file with networks data')
 
@@ -70,20 +26,20 @@ def main():
 
     pool = mp.Pool(mp.cpu_count() + 2)
 
-    stime = datetime.now().strftime("%H:%M %d.%m.%y")
     cwd = os.getcwd()
-
-    base_path = os.path.join(cwd, stime)
-    shutil.rmtree(base_path, ignore_errors=True)
-    networks = os.path.join(base_path, "networks")
-    os.mkdir(base_path)
-    os.mkdir(networks)
 
     jobs = []
     for elem in data["networks"]:
         p = function_mappings.get(elem["name"], None)
         if p is None:
             print("WARN: Cannot process {} network: Unknown network".format(elem["name"]))
+            continue
+
+        if "enable" not in elem:
+            print("WARN: Cannot process {} network: enable not provided".format(elem["name"]))
+            continue
+
+        if not elem["enable"]:
             continue
 
         if "address" not in elem:
@@ -93,7 +49,7 @@ def main():
         if "from-block" not in elem:
             elem["from-block"] = 0
 
-        job = pool.apply_async(p, (networks, elem["address"], elem["from-block"]))
+        job = pool.apply_async(p, (cwd, elem["address"], elem["from-block"]))
         jobs.append(job)
 
     for job in jobs:
@@ -101,8 +57,6 @@ def main():
 
     pool.close()
     pool.join()
-
-    compile_final_report(base_path, args.add_networks)
 
 
 if __name__ == '__main__':
