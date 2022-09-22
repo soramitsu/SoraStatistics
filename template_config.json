@@ -1,0 +1,21 @@
+{
+  "networks": [
+    {
+      "enable": true,
+      "name": "ethereum",
+      "address": "eth address",
+      "from-block": 0
+    },
+    {
+      "enable": true,
+      "name": "sora",
+      "address": "sora address 1",
+      "from-block": 0
+    },
+    {
+      "enable": false,
+      "name": "sora",
+      "address": "sora address 2"
+    }
+  ]
+}
