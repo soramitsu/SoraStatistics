@@ -8,7 +8,7 @@ from substrateinterface.utils import ss58
 import os
 
 # Select your transport with a defined url endpoint
-transport = AIOHTTPTransport(url="https://api.subquery.network/sq/sora-xor/sora")
+transport = AIOHTTPTransport(url="https://api.subquery.network/sq/sora-xor/sora-prod-sub4")
 
 # Create a GraphQL client using the defined transport
 client = gql.Client(transport=transport, fetch_schema_from_transport=True, execute_timeout=None)
