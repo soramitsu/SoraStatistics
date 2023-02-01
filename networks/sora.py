@@ -4,7 +4,7 @@ import gql
 from gql.transport.aiohttp import AIOHTTPTransport
 import pandas as pd
 from datetime import datetime
-from substrateinterface.utils import ss58
+from utils import ss58
 import os
 
 # Select your transport with a defined url endpoint
