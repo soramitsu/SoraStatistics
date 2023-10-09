@@ -219,12 +219,13 @@ def process_module(context: Context, node, transaction):
     return [transaction]
 
 
-def sora_process(base_path, address, from_block):
+def sora_process(base_path, address, from_block, to_block):
     if not ss58.is_valid_ss58_address(address):
         raise ValueError(f"Address {address} is not valid ss58 address")
 
     variables = {"filter": {
         "and": [{"blockHeight": {"greaterThan": from_block}},
+                {"blockHeight": {"lessThan": to_block}},
                 {"or": [
                     {"module": {"equalTo": "assets"}, "method": {"equalTo": "transfer"}},
                     {"module": {"equalTo": "liquidityProxy"}, "method": {"equalTo": "swap"}},

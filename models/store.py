@@ -55,7 +55,7 @@ class TokenStore:
     def __del__(self):
         self.ws.close()
 
-    def get_asset_amount(self, asset_id: str, block_hash: str):
+    def get_asset_amount(self, asset_id: str):
         if asset_id not in self.store:
             if not self._fetch_token(asset_id):
                 return 0
@@ -63,7 +63,7 @@ class TokenStore:
         precision = self.store[asset_id].precision
 
         req_supply = {"id": self.id, "jsonrpc": "2.0", "method": "assets_totalSupply",
-                      "params": [asset_id, block_hash]}
+                      "params": [asset_id]}
         rcv = self._reliable_send(json.dumps(req_supply))
         if rcv is None:
             return 0

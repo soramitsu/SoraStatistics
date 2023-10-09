@@ -2,20 +2,10 @@
   "networks": [
     {
       "enable": true,
-      "name": "ethereum",
-      "address": "eth address",
-      "from-block": 0
-    },
-    {
-      "enable": true,
       "name": "sora",
-      "address": "sora address 1",
-      "from-block": 0
-    },
-    {
-      "enable": false,
-      "name": "sora",
-      "address": "sora address 2"
+      "address": "cnUZkAbtX2u9ko8g6uwihfGNUrXTVEiG2oB4ZTU5VF98eqe43",
+      "from-block": 8645973,
+      "to-block": 12046606
     }
   ]
 }

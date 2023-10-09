@@ -49,7 +49,10 @@ def main():
         if "from-block" not in elem:
             elem["from-block"] = 0
 
-        job = pool.apply_async(p, (cwd, elem["address"], elem["from-block"]))
+        if "to-block" not in elem:
+            elem["to-block"] = 1000
+
+        job = pool.apply_async(p, (cwd, elem["address"], elem["from-block"], elem["to-block"]))
         jobs.append(job)
 
     for job in jobs:
