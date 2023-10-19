@@ -1,14 +1,15 @@
 #!/bin/bash
-pip install -r requirements.txt
 mkdir -p ./reports/sorareports
 mkdir -p ./reports/etheriumreports
+
+pip install -r requirements.txt
 
 sed -i -e 's/001/'"$networkname"'/g' template_config_ci.json
 sed -i -e 's/002/'"${address//\//\\\/}"'/g' template_config_ci.json
 sed -i -e 's/003/'"$fromblock"'/g' template_config_ci.json
 sed -i -e 's/004/'"$toblock"'/g' template_config_ci.json
 
-python main.py ./template_config_ci.json
+python main.py ./template_config.json
 
 directory="./reports"
 
