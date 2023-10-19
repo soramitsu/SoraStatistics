@@ -333,9 +333,8 @@ def sora_process(base_path, address, from_block, to_block):
                 break
             if transactions.empty:
                 return
-        except Exception as e:
-            print("Error importing sora_process:", e)
-            if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code == 502:
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 502:
                 continue
             else:
                 raise e
