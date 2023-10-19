@@ -333,10 +333,8 @@ def sora_process(base_path, address, from_block, to_block):
         variables["after"] = page_info["endCursor"]
         if not page_info["hasNextPage"]:
             break
-
-    for transaction in transactions:
-        if transactions.empty() or result.get("errors", [])[0].get("message") == "502: Bad Gateway":
-            return
+    if transactions.empty or (result.get("errors") and result["errors"][0].get("message") == "502: Bad Gateway"):
+        return
 
     to_block = transactions.head(1)["height"].values[0]
     stime = datetime.now().strftime("%H:%M %d.%m.%y")
