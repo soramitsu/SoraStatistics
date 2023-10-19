@@ -343,6 +343,6 @@ def sora_process(base_path, address, from_block, to_block):
     to_block = transactions.head(1)["height"].values[0]
     stime = datetime.now().strftime("%H:%M %d.%m.%y")
     #name = f"SORA{stime}{address[:4]}...{address[-4:]}({from_block}:{to_block}]"
-    name = f"SORA{stime}({from_block}:{to_block}]"
+    name = f"{from_block}-{to_block}"
     filepath = os.path.join(base_path, f"reports/sorareports/{name}.csv")
     transactions.rename(columns=columns).to_csv(filepath)
