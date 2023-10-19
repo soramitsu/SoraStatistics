@@ -6,8 +6,7 @@ import pandas as pd
 from datetime import datetime
 from utils import ss58
 import os
-import aiohttp
-import gql.transport.exceptions
+import requests
 
 # Select your transport with a defined url endpoint
 transport = AIOHTTPTransport(url="https://api.subquery.network/sq/sora-xor/sora-prod-sub4")
@@ -332,12 +331,11 @@ def sora_process(base_path, address, from_block, to_block):
             variables["after"] = page_info["endCursor"]
             if not page_info["hasNextPage"]:
                 break
-            if transactions.empty:
+            if transactions.empty or (result.get("errors") and result["errors"][0].get("message") == "502: Bad Gateway"):
                 return
-        except (aiohttp.ClientResponseError, gql.transport.exceptions.TransportServerError) as e:
-            if isinstance(e, aiohttp.ClientResponseError) and e.status == 502:
-                continue
-            elif isinstance(e, gql.transport.exceptions.TransportServerError) and e.status_code == 502:
+        except Exception as e:
+            print("Error importing sora_process:", e)
+            if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code == 502:
                 continue
             else:
                 raise e
@@ -345,6 +343,6 @@ def sora_process(base_path, address, from_block, to_block):
     to_block = transactions.head(1)["height"].values[0]
     stime = datetime.now().strftime("%H:%M %d.%m.%y")
     #name = f"SORA{stime}{address[:4]}...{address[-4:]}({from_block}:{to_block}]"
-    name = f"{from_block}-{to_block}"
+    name = f"SORA{stime}({from_block}:{to_block}]"
     filepath = os.path.join(base_path, f"reports/sorareports/{name}.csv")
     transactions.rename(columns=columns).to_csv(filepath)
