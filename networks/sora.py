@@ -337,7 +337,7 @@ def sora_process(base_path, address, from_block, to_block):
         except (aiohttp.ClientResponseError, gql.transport.exceptions.TransportServerError) as e:
             if isinstance(e, aiohttp.ClientResponseError) and e.status == 502:
                 continue
-            elif isinstance(e, gql.transport.exceptions.TransportServerError) and e.status == 502:
+            elif isinstance(e, gql.transport.exceptions.TransportServerError) and e.e.original_status == 502:
                 continue
             else:
                 raise e
