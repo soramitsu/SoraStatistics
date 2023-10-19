@@ -337,11 +337,10 @@ def sora_process(base_path, address, from_block, to_block):
         except (aiohttp.client_exceptions.ClientResponseError, gql.transport.exceptions.TransportServerError) as e:
             if isinstance(e, aiohttp.client_exceptions.ClientResponseError) and e.status == 502:
                 continue
-            elif isinstance(e, gql.transport.exceptions.TransportServerError) and e.status_code == 502:
+            elif isinstance(e, gql.transport.exceptions.TransportServerError) and e.status == 502:
                 continue
             else:
                 raise e
-
 
     to_block = transactions.head(1)["height"].values[0]
     stime = datetime.now().strftime("%H:%M %d.%m.%y")
