@@ -10,7 +10,10 @@ sed -i -e 's/002/'"${address//\//\\\/}"'/g' template_config_ci.json
 sed -i -e 's/003/'"$fromblock"'/g' template_config_ci.json
 sed -i -e 's/004/'"$toblock"'/g' template_config_ci.json
 
-python main.py ./template_config.json
+# For logging
+printf "🚙 Start block is: $fromblock \n 🏁 Finish block is: $toblock\n"
+
+python main.py ./template_config_ci.json
 
 directory="./reports"
 
