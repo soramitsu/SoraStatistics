@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 mkdir -p ./reports/sorareports
 mkdir -p ./reports/etheriumreports
 
@@ -23,6 +24,8 @@ if [ -n "$files" ]; then
     -F chat_id="$telegram_group_chat_id" \
     -F caption="Report: $file"
   done
+  exit 0
 else
     printf "❌ No reports found! \n"
+    exit 1
 fi
