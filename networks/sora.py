@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import datetime
 from utils import ss58
 import os
+import requests
 
 # Select your transport with a defined url endpoint
 transport = AIOHTTPTransport(url="https://api.subquery.network/sq/sora-xor/sora-prod-sub4")
