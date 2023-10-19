@@ -6,7 +6,6 @@ import pandas as pd
 from datetime import datetime
 from utils import ss58
 import os
-import requests
 
 # Select your transport with a defined url endpoint
 transport = AIOHTTPTransport(url="https://api.subquery.network/sq/sora-xor/sora-prod-sub4")
@@ -333,8 +332,8 @@ def sora_process(base_path, address, from_block, to_block):
                 break
             if transactions.empty:
                 return
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 502:
+        except aiohttp.client_exceptions.ClientResponseError as e:
+            if e.status == 502:
                 continue
             else:
                 raise e
