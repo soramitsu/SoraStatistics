@@ -20,9 +20,9 @@ directory="./reports"
 files=$(find / -name "SORA*.csv")
 
 if [ -n "$files" ]; then
+  telegram_bot_token=${TELEGRAM_BOT_TOKEN}
+  telegram_group_chat_id=${TELEGRAM_CHAT_ID}
   for file in $files; do
-    telegram_bot_token=${TELEGRAM_BOT_TOKEN}
-    telegram_group_chat_id=${TELEGRAM_CHAT_ID}
     curl -F document=@"$file" "https://api.telegram.org/bot$telegram_bot_token/sendDocument" \
     -F chat_id="$telegram_group_chat_id" \
     -F caption="Report: $file"
