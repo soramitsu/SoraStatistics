@@ -331,7 +331,7 @@ def sora_process(base_path, address, from_block, to_block):
             variables["after"] = page_info["endCursor"]
             if not page_info["hasNextPage"]:
                 break
-            if transactions.empty or (result.get("errors") and result["errors"][0].get("message") == "502: Bad Gateway"):
+            if transactions.empty:
                 return
         except Exception as e:
             print("Error importing sora_process:", e)
