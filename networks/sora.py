@@ -303,38 +303,41 @@ def sora_process(base_path, address, from_block, to_block):
     context = Context(address)
 
     while True:
-        page_transactions = pd.DataFrame()
-        result = client.execute(query, variable_values=variables)
-
-        elements = result["historyElements"]
-        page_info = elements["pageInfo"]
-        edges = elements["edges"]
-        i = 0
-        for edge in edges:
-            node = edge["node"]
-            i += 1
-            transaction = transaction_template.copy()
-            transaction["scan"] = "SubQuery"
-            transaction["network"] = "SORA Main Net"
-            transaction["timestamp"] = node["timestamp"]
-            transaction["date"] = datetime.utcfromtimestamp(node["timestamp"]).strftime('%Y-%m-%d %H:%M:%S')
-            transaction["height"] = node["blockHeight"]
-            transaction["tx_hash"] = node["id"]
-            transaction["line"] = 1
-            transaction["network_fee"] = node["networkFee"]
-            transaction["fee_ticker"] = "XOR"
-
-            new_transactions = process_module(context, node, transaction)
-
-            for elem in new_transactions:
-                page_transactions = page_transactions.append(elem, ignore_index=True)
-
-        transactions = pd.concat([transactions, page_transactions])
-        variables["after"] = page_info["endCursor"]
-        if not page_info["hasNextPage"]:
-            break
-    if transactions.empty or (result.get("errors") and result["errors"][0].get("message") == "502: Bad Gateway"):
-        return
+        try:
+            page_transactions = pd.DataFrame()
+            result = client.execute(query, variable_values=variables)
+            elements = result["historyElements"]
+            page_info = elements["pageInfo"]
+            edges = elements["edges"]
+            i = 0
+            for edge in edges:
+                node = edge["node"]
+                i += 1
+                transaction = transaction_template.copy()
+                transaction["scan"] = "SubQuery"
+                transaction["network"] = "SORA Main Net"
+                transaction["timestamp"] = node["timestamp"]
+                transaction["date"] = datetime.utcfromtimestamp(node["timestamp"]).strftime('%Y-%m-%d %H:%M:%S')
+                transaction["height"] = node["blockHeight"]
+                transaction["tx_hash"] = node["id"]
+                transaction["line"] = 1
+                transaction["network_fee"] = node["networkFee"]
+                transaction["fee_ticker"] = "XOR"
+                new_transactions = process_module(context, node, transaction)
+                for elem in new_transactions:
+                    page_transactions = page_transactions.append(elem, ignore_index=True)
+            transactions = pd.concat([transactions, page_transactions])
+            variables["after"] = page_info["endCursor"]
+            if not page_info["hasNextPage"]:
+                break
+            if transactions.empty or (result.get("errors") and result["errors"][0].get("message") == "502: Bad Gateway"):
+                return
+        except Exception as e:
+            print("Error importing sora_process:", e)
+            if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code == 502:
+                continue
+            else:
+                raise e
 
     to_block = transactions.head(1)["height"].values[0]
     stime = datetime.now().strftime("%H:%M %d.%m.%y")
