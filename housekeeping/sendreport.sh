@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 set -e
 mkdir -p ./reports/sorareports
 mkdir -p ./reports/etheriumreports
@@ -17,7 +17,7 @@ python main.py ./template_config_ci.json
 
 directory="./reports"
 
-files=$(find / -name "SORA*.csv")
+files=$(find $directory -name "*.csv")
 
 if [ -n "$files" ]; then
   telegram_bot_token=${TELEGRAM_BOT_TOKEN}
