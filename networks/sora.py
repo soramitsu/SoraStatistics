@@ -333,6 +333,12 @@ def sora_process(base_path, address, from_block, to_block):
                 break
             if transactions.empty or (result.get("errors") and result["errors"][0].get("message") == "502: Bad Gateway"):
                 return
+        except Exception as e:
+            print("Error importing sora_process:", e)
+            if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code == 502:
+                continue
+            else:
+                raise e
 
     to_block = transactions.head(1)["height"].values[0]
     stime = datetime.now().strftime("%H:%M %d.%m.%y")
