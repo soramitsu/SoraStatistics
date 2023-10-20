@@ -332,7 +332,7 @@ def sora_process(base_path, address, from_block, to_block):
             if not page_info["hasNextPage"]:
                 break
             if transactions.empty or (result.get("errors") and result["errors"][0].get("message") == "502: Bad Gateway"):
-                return
+                continue
         except Exception as e:
             print("Error importing sora_process:", e)
             if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code == 502:
