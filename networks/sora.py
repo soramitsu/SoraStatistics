@@ -9,7 +9,7 @@ import os
 import requests
 
 # Select your transport with a defined url endpoint
-transport = AIOHTTPTransport(url="https://subquery.q1.prd.sora2.soramitsu.co.jp")
+transport = AIOHTTPTransport(url="https://api.subquery.network/sq/sora-xor/sora-prod")
 
 # Create a GraphQL client using the defined transport
 client = gql.Client(transport=transport, fetch_schema_from_transport=True, execute_timeout=None)
