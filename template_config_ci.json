@@ -1,0 +1,11 @@
+{
+  "networks": [
+    {
+      "enable": true,
+      "name": "001",
+      "address": "002",
+      "from-block": "003",
+      "to-block": "004"
+    }
+  ]
+}

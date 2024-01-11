@@ -6,9 +6,10 @@ import pandas as pd
 from datetime import datetime
 from utils import ss58
 import os
+import requests
 
 # Select your transport with a defined url endpoint
-transport = AIOHTTPTransport(url="https://api.subquery.network/sq/sora-xor/sora-prod-sub4")
+transport = AIOHTTPTransport(url="https://api.subquery.network/sq/sora-xor/sora-prod")
 
 # Create a GraphQL client using the defined transport
 client = gql.Client(transport=transport, fetch_schema_from_transport=True, execute_timeout=None)
@@ -339,6 +340,7 @@ def sora_process(base_path, address, from_block, to_block):
 
     to_block = transactions.head(1)["height"].values[0]
     stime = datetime.now().strftime("%H:%M %d.%m.%y")
-    name = f"SORA {stime} {address[:4]}...{address[-4:]} ({from_block}:{to_block}]"
-    filepath = os.path.join(base_path, f"{name}.csv")
+    #name = f"SORA{stime}{address[:4]}...{address[-4:]}({from_block}:{to_block}]"
+    name = f"{from_block}:{to_block}"
+    filepath = os.path.join(base_path, f"reports/sorareports/{name}.csv")
     transactions.rename(columns=columns).to_csv(filepath)
